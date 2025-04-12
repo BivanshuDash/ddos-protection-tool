@@ -3,18 +3,16 @@ import platform
 from collections import defaultdict
 
 LOG_FILE = os.path.join(os.path.dirname(__file__), '../logs/access.log')
-BLOCK_THRESHOLD = 30
+BLOCK_THRESHOLD = 75  # Match analyzer threshold
 BLOCKED_IPS_LOG = os.path.join(os.path.dirname(__file__), 'blocked_ips.txt')
 
 def get_suspicious_ips():
     ip_count = defaultdict(int)
     with open(LOG_FILE, "r") as f:
         for line in f:
-            try:
-                ip, path, timestamp = line.strip().split(" - ")
+            if "-" in line:
+                ip = line.split("-")[0].strip()
                 ip_count[ip] += 1
-            except ValueError:
-                continue
     return [ip for ip, count in ip_count.items() if count > BLOCK_THRESHOLD]
 
 def block_ip(ip):
